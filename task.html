@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Productivity App</title>
+<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  .nav-link {
+    color: black !important;
+    padding: 10px !important;
+    text-align: center;
+    border-bottom: 1px solid black;
+  }
+  .nav-link:hover {
+    background-color: #e0e0e0 !important;
+  }
+  .left-side, .right-side {
+    height: 100vh;
+  }
+  .left-side {
+    background-color: #f0f0f0;
+  }
+  .right-side {
+    background-color: #ddd;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+</style>
+</head>
+<body>
+
+<div class="container-fluid h-100">
+  <div class="row h-100">
+    <div class="col-md-3 left-side">
+      <nav class="nav flex-column">
+        <a class="nav-link" href="home.html">Home</a>
+        <a class="nav-link" href="myday.html">My Day</a>
+        <a class="nav-link" href="important.html">Important</a>
+        <a class="nav-link" href="planned.html">Planned</a>
+        <a class="nav-link" href="task.html">Task</a>
+      </nav>
+    </div>
+    <div class="col-md-9 right-side">
+      <div class="todo-container">
+        <h1>To-Do List</h1>
+        <input type="text" id="taskInput" placeholder="Add new task..." class="form-control">
+        <button onclick="addTask()" class="btn btn-primary mt-2">Add Task</button>
+        <ul id="taskList" class="list-group mt-3"></ul>
+    </div>
+  </div>
+</div>
+
+
+<script>
+  function addTask() {
+    var input = document.getElementById('taskInput');
+    var task = input.value.trim();
+    if (task !== '') {
+      var li = document.createElement('li');
+      li.classList.add('list-group-item');
+      li.innerText = task;
+  
+      // Adding a delete button to each task
+      var deleteBtn = document.createElement('button');
+      deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm', 'float-right');
+      deleteBtn.innerText = 'Delete';
+      deleteBtn.onclick = function() {
+        li.remove();
+      };
+  
+      li.appendChild(deleteBtn);
+  
+      document.getElementById('taskList').appendChild(li);
+      input.value = ''; // Clear input field after adding
+    } else {
+      alert('Please enter a task.');
+    }
+  }
+  
+  // Optional: Execute addTask function on Enter key press
+  document.getElementById('taskInput').addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+      addTask();
+    }
+  });
+</script>
+  
+<script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+</body>
+</html>
+
