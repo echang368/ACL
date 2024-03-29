@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Productivity App</title>
+<title>Productivity App - Important</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 <style>
   .nav-link {
@@ -23,10 +23,10 @@
   }
   .right-side {
     background-color: #ddd;
-    display: flex;
-    justify-content: center;
-    align-items: center;
+    padding: 20px;
   }
+  .task-item { display: flex; align-items: center; justify-content: space-between; }
+  .btn-sm { margin-left: 5px; }
 </style>
 </head>
 <body>
@@ -37,14 +37,14 @@
       <nav class="nav flex-column">
         <a class="nav-link" href="home.html">Home</a>
         <a class="nav-link" href="myday.html">My Day</a>
-        <a class="nav-link" href="important.html">Important</a>
+        <a class="nav-link active" href="important.html">Important</a>
         <a class="nav-link" href="planned.html">Planned</a>
         <a class="nav-link" href="task.html">Task</a>
       </nav>
     </div>
     <div class="col-md-9 right-side">
-      <h1>Important</h1>
-      <p>Important</p>
+      <h2>Important Tasks</h2>
+      <ul id="importantList" class="list-group mt-3"></ul>
     </div>
   </div>
 </div>
@@ -52,5 +52,137 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    displayImportantTasks();
+});
+
+function displayImportantTasks() {
+    var allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
+    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
+    var importantListElement = document.getElementById('importantList');
+    importantListElement.innerHTML = ''; // Clear the list for updated display
+
+    var today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+
+    allTasks.forEach(function(taskObj) {
+        var dueDate = taskObj.dueDate ? new Date(taskObj.dueDate) : null;
+        var isDueTodayOrOverdue = dueDate && dueDate <= today;
+        var isImportant = importantTasks.includes(taskObj.taskName);
+
+        // Include tasks that are marked as important or due today/overdue
+        if (isImportant || isDueTodayOrOverdue) {
+            var li = document.createElement('li');
+            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+
+            var textContainer = document.createElement('div');
+            textContainer.classList.add('d-flex', 'align-items-center');
+
+            var starBtn = document.createElement('button');
+            starBtn.className = 'btn btn-sm';
+            starBtn.innerHTML = '&#9733;'; // Always show as important here
+            starBtn.style.color = 'yellow';
+            starBtn.style.fontSize = '20px';
+            starBtn.onclick = function() {
+                toggleImportance(taskObj.taskName);
+            };
+
+            var taskSpan = document.createElement('span');
+            taskSpan.textContent = ' ' + taskObj.taskName + 
+                (taskObj.dueDate ? ' (Due: ' + taskObj.dueDate + ')' : '');
+            taskSpan.classList.add('ml-2'); // Add spacing
+
+            textContainer.appendChild(starBtn);
+            textContainer.appendChild(taskSpan);
+
+            var deleteBtn = document.createElement('button');
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.className = 'btn btn-danger btn-sm';
+            deleteBtn.onclick = function() {
+                deleteTask(taskObj.taskName);
+            };
+
+            li.appendChild(textContainer);
+            li.appendChild(deleteBtn);
+
+            importantListElement.appendChild(li);
+        }
+    });
+}
+
+function toggleImportance(taskName) {
+    var index = importantTasks.indexOf(taskName);
+    if (index !== -1) {
+        importantTasks.splice(index, 1); // Remove from important
+    } else {
+        importantTasks.push(taskName); // Add to important
+    }
+    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
+    displayImportantTasks(); // Refresh the list
+}
+
+function deleteTask(taskName) {
+    var allTasksIndex = allTasks.findIndex(task => task.taskName === taskName);
+    if (allTasksIndex > -1) {
+        allTasks.splice(allTasksIndex, 1); // Remove from all tasks
+    }
+
+    var importantTasksIndex = importantTasks.indexOf(taskName);
+    if (importantTasksIndex > -1) {
+        importantTasks.splice(importantTasksIndex, 1); // Remove from important tasks
+    }
+
+    localStorage.setItem('allTasks', JSON.stringify(allTasks));
+    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
+    displayImportantTasks(); // Refresh the important tasks list
+}
+
+
+function deleteTask(taskName) {
+    // Remove task from all tasks and important tasks, if present
+    var allTasks = JSON.parse(localStorage.getItem('allTasks'));
+    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
+
+    // Find and remove the task from all tasks
+    var allIndex = allTasks.indexOf(taskName);
+    if (allIndex !== -1) {
+        allTasks.splice(allIndex, 1);
+    }
+
+    // Find and remove the task from important tasks
+    var importantIndex = importantTasks.indexOf(taskName);
+    if (importantIndex !== -1) {
+        importantTasks.splice(importantIndex, 1);
+    }
+
+    // Save the updated lists back to localStorage
+    localStorage.setItem('allTasks', JSON.stringify(allTasks));
+    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
+
+    // Refresh the list to show the current tasks
+    displayImportantTasks();
+}
+
+function toggleImportance(taskName) {
+    // Toggle the importance status of a task
+    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
+    var index = importantTasks.indexOf(taskName);
+
+    // If the task is currently marked as important, unmark it
+    if (index !== -1) {
+        importantTasks.splice(index, 1); // Remove from the list of important tasks
+    } else {
+        // If it was not marked as important, this is unexpected since we're in the Important view
+        // Optionally handle this case, such as re-adding to important tasks or logging an error
+    }
+
+    // Update the important tasks list in localStorage
+    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
+
+    // Refresh the list of important tasks
+    displayImportantTasks();
+}
+</script>
 </body>
 </html>

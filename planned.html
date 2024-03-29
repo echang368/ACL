@@ -1,9 +1,10 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Productivity App</title>
+<title>Weekly Planner</title>
 <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
 <style>
   .nav-link {
@@ -23,9 +24,31 @@
   }
   .right-side {
     background-color: #ddd;
+    padding: 20px;
+  }
+  .week-day {
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    min-width: 150px; 
+    min-height: 500px;
+    margin-bottom: 10px;
+    padding: 10px;
+    position: relative;
+  }
+  .add-plan-btn {
+    background-color: skyblue;
+    color: white;
+    border: none;
+    bottom: 10px;
+    right: 10px;
+  }
+  .plan-item {
     display: flex;
-    justify-content: center;
-    align-items: center;
+    justify-content: space-between;
+    margin-top: 5px;
+    padding: 5px;
+    background-color: #e9ecef;
+    border-radius: 5px;
   }
 </style>
 </head>
@@ -43,8 +66,16 @@
       </nav>
     </div>
     <div class="col-md-9 right-side">
-      <h1>Planned</h1>
-      <p>Planned</p>
+      <h2>Weekly Planner</h2>
+      <div class="row text-center">
+        <div class="col-1 week-day" id="monday-plans">Monday</div>
+        <div class="col-1 week-day" id="tuesday-plans">Tuesday</div>
+        <div class="col-1 week-day" id="wednesday-plans">Wednesday</div>
+        <div class="col-1 week-day" id="thursday-plans">Thursday</div>
+        <div class="col-1 week-day" id="friday-plans">Friday</div>
+        <div class="col-1 week-day" id="saturday-plans">Saturday</div>
+        <div class="col-1 week-day" id="sunday-plans">Sunday</div>
+      </div>
     </div>
   </div>
 </div>
@@ -52,5 +83,104 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+let weekPlans = JSON.parse(localStorage.getItem('weekPlans')) || {
+  monday: [], tuesday: [], wednesday: [], thursday: [], friday: [], saturday: [], sunday: []
+};
+
+function addPlan(day) {
+  let planText = prompt("Enter your plan for " + day.charAt(0).toUpperCase() + day.slice(1) + ":");
+  if (planText) {
+    weekPlans[day].push(planText);
+    localStorage.setItem('weekPlans', JSON.stringify(weekPlans));
+    displayWeekPlans();
+  }
+}
+
+function displayWeekPlans() {
+  // Assuming 'weekPlans' is already defined and populated
+  const container = document.querySelector('.right-side'); // Assuming this is your main container for the planner
+  container.innerHTML = ''; // Clear previous content
+
+  Object.keys(weekPlans).forEach(day => {
+    // Create a div for the day
+    const dayDiv = document.createElement('div');
+    dayDiv.className = 'day-column'; // Use this class for styling
+    dayDiv.innerHTML = `<h4>${day.charAt(0).toUpperCase() + day.slice(1)}</h4>`; // Day name
+    
+    // Create the "Add" button
+    const addButton = document.createElement('button');
+    addButton.textContent = '+';
+    addButton.className = 'btn add-plan-btn';
+    addButton.onclick = () => addPlan(day);
+    dayDiv.appendChild(addButton);
+
+    // List plans for the day
+    weekPlans[day].forEach(plan => {
+      const planItem = document.createElement('div');
+      planItem.className = 'plan-item';
+      planItem.textContent = plan;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'x';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.onclick = () => deletePlan(day, plan);
+
+      planItem.appendChild(deleteBtn);
+      dayDiv.appendChild(planItem);
+    });
+
+    container.appendChild(dayDiv); // Append the day's div to the container
+  });
+}function displayWeekPlans() {
+  // Clearing existing content and setting up each day's plans
+  Object.keys(weekPlans).forEach(day => {
+    const dayColumn = document.getElementById(day + '-plans');
+    // Reset the column content with the day name and Add button
+    dayColumn.innerHTML = day.charAt(0).toUpperCase() + day.slice(1) + ' ';
+    
+    const addButton = document.createElement('button');
+    addButton.className = 'btn btn-success add-plan-btn';
+    addButton.textContent = '+';
+    addButton.onclick = () => addPlan(day);
+    dayColumn.appendChild(addButton);
+
+    // Adding each plan with a delete button
+    weekPlans[day].forEach(plan => {
+      const planItem = document.createElement('div');
+      planItem.className = 'plan-item';
+      planItem.textContent = plan;
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.textContent = 'x';
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.onclick = () => {
+        deletePlan(day, plan);
+      };
+
+      planItem.appendChild(deleteBtn);
+      dayColumn.appendChild(planItem);
+    });
+  });
+}
+
+function deletePlan(day, planToDelete) {
+  // Filtering out the plan to delete and updating localStorage
+  weekPlans[day] = weekPlans[day].filter(plan => plan !== planToDelete);
+  localStorage.setItem('weekPlans', JSON.stringify(weekPlans));
+  displayWeekPlans(); // Refresh the displayed plans
+}
+
+
+
+function deletePlan(day, planToDelete) {
+  // Filtering out the plan to delete and updating localStorage
+  weekPlans[day] = weekPlans[day].filter(plan => plan !== planToDelete);
+  localStorage.setItem('weekPlans', JSON.stringify(weekPlans));
+  displayWeekPlans(); // Refresh the displayed plans
+}
+
+document.addEventListener('DOMContentLoaded', displayWeekPlans);
+</script>
 </body>
 </html>
