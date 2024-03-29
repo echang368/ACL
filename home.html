@@ -24,8 +24,38 @@
   .right-side {
     background-color: #ddd;
     display: flex;
-    justify-content: center;
+    flex-direction: column;
     align-items: center;
+  }
+  #calendar {
+    margin-top: 20px;
+    width: 100%;
+    max-width: 600px;
+  }
+  .calendar-header {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px;
+    background-color: #f8f9fa;
+  }
+  .day-names {
+    display: flex;
+    background-color: #e9ecef;
+    padding: 10px 0;
+  }
+  .day-name {
+    flex: 1;
+    text-align: center;
+  }
+  .day {
+    border: 1px solid #dee2e6;
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .today {
+    background-color: #ffc107; /* Highlight today's date */
   }
 </style>
 </head>
@@ -35,16 +65,15 @@
   <div class="row h-100">
     <div class="col-md-3 left-side">
       <nav class="nav flex-column">
-        <a class="nav-link" href="home.html">Home</a>
-        <a class="nav-link" href="myday.html">My Day</a>
-        <a class="nav-link" href="important.html">Important</a>
-        <a class="nav-link" href="planned.html">Planned</a>
-        <a class="nav-link" href="task.html">Task</a>
+        <a class="nav-link active" href="#">Home</a>
+        <a class="nav-link" href="#">My Day</a>
+        <a class="nav-link" href="#">Important</a>
+        <a class="nav-link" href="#">Planned</a>
+        <a class="nav-link" href="#">Task</a>
       </nav>
     </div>
     <div class="col-md-9 right-side">
-      <h1>H</h1>
-      <p>home</p>
+      <div id="calendar"></div> <!-- Placeholder for the calendar -->
     </div>
   </div>
 </div>
@@ -52,6 +81,58 @@
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.2/dist/umd/popper.min.js"></script>
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const calendarEl = document.getElementById('calendar');
+  let currentMonth = new Date().getMonth();
+  let currentYear = new Date().getFullYear();
+  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+  
+  function generateCalendar(month, year) {
+    const today = new Date();
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDay = new Date(year, month, 1).getDay();
+    
+    let calendarHTML = `<div class="calendar-header">
+                          <span>${monthNames[month]} ${year}</span>
+                        </div>
+                        <div class="day-names">`;
+    
+    for (const dayName of dayNames) {
+      calendarHTML += `<div class="day-name">${dayName}</div>`;
+    }
+    calendarHTML += `</div><div class="row">`;
+    
+    for (let i = 0; i < firstDay; i++) {
+      calendarHTML += `<div class="col day"></div>`;
+    }
+    
+    for (let day = 1; day <= daysInMonth; day++) {
+      let dayClass = "day";
+      if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
+        dayClass += " today"; // Highlight the current day
+      }
+      calendarHTML += `<div class="col ${dayClass}">${day}</div>`;
+      if ((day + firstDay) % 7 === 0) {
+        calendarHTML += `</div><div class="row">`; // Start a new row for the next week
+      }
+    }
+
+    // Fill the last row with empty cells if needed
+    let lastDay = (firstDay + daysInMonth) % 7;
+    if (lastDay !== 0) {
+      for (let i = lastDay; i < 7; i++) {
+        calendarHTML += `<div class="col day"></div>`;
+      }
+    }
+
+    calendarHTML += `</div>`; // Ensure the last row is closed properly
+    calendarEl.innerHTML = calendarHTML;
+  }
+
+  generateCalendar(currentMonth, currentYear);
+});
+</script>
 </body>
 </html>
-
