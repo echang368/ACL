@@ -25,8 +25,26 @@
             background-color: #ddd;
             padding: 20px;
         }
-        .task-item { display: flex; align-items: center; justify-content: space-between; }
-        .btn-sm { margin-left: 5px; }
+        .task-item { 
+            display: flex; 
+            align-items: center; 
+            justify-content: space-between; 
+        }
+        .task-detail {
+            display: flex; 
+            align-items: center; 
+        }
+        .btn-sm { 
+            margin-left: 5px; 
+        }
+        .importance-btn {
+            margin-right: 5px;
+        }
+        .action-buttons {
+        display: flex;
+        justify-content: flex-end;
+        gap: 10px; /* Ensures a little space between buttons */
+    }
     </style>
 </head>
 <body>
@@ -61,19 +79,21 @@ document.addEventListener('DOMContentLoaded', function() {
     displayTasks(); // Display tasks on initial load
 });
 
-function addTask() {
-    var taskInput = document.getElementById('taskInput');
-    var dueDateInput = document.getElementById('taskDueDate');
-    var taskName = taskInput.value.trim();
-    var dueDate = dueDateInput.value; // This can be an empty string if no date is selected
+let allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
+let importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
 
-    if (taskName) { // Task name is required
-        var allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
-        
+function addTask() {
+    const taskInput = document.getElementById('taskInput');
+    const dueDateInput = document.getElementById('taskDueDate');
+    const taskName = taskInput.value.trim();
+    const dueDate = dueDateInput.value;
+
+    if (taskName) {
         if (!allTasks.some(task => task.taskName === taskName)) {
-            var newTask = {
+            const newTask = {
                 taskName,
-                dueDate: dueDate || "" // Store an empty string if no due date is provided
+                dueDate,
+                isMyDay: false // Default to false; modify based on your logic for "My Day"
             };
             allTasks.push(newTask);
             localStorage.setItem('allTasks', JSON.stringify(allTasks));
@@ -82,83 +102,77 @@ function addTask() {
             alert('Task already exists.');
         }
 
-        taskInput.value = ''; // Clear the task input field after adding
-        dueDateInput.value = ''; // Clear the due date input field
+        taskInput.value = ''; // Clear the input fields after adding
+        dueDateInput.value = '';
     } else {
         alert('Please enter a task name.');
     }
 }
 
 function displayTasks() {
-    var allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
-    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
-    var taskListElement = document.getElementById('taskList');
-    taskListElement.innerHTML = ''; // Clear the list for updated display
+    const taskListElement = document.getElementById('taskList');
+    taskListElement.innerHTML = ''; // Clear the list
 
-    allTasks.forEach(function(taskObj) {
-        var li = document.createElement('li');
-        li.classList.add('list-group-item', 'task-item');
+    allTasks.forEach((task, index) => {
+        const li = document.createElement('li');
+        li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
+        
+        // Task name and due date display
+        const taskDetail = document.createElement('div');
+        taskDetail.textContent = `${task.taskName} - Due: ${task.dueDate || 'No date specified'}`;
+        
+        // Container for action buttons
+        const actionButtons = document.createElement('div');
+        actionButtons.className = 'action-buttons';
 
-        // Initialize the star button for marking importance
-        var starBtn = document.createElement('button');
-        starBtn.className = 'btn btn-sm mr-2'; // Added margin-right for spacing
-        starBtn.innerHTML = importantTasks.includes(taskObj.taskName) ? '&#9733;' : '&#9734;';
-        starBtn.style.color = importantTasks.includes(taskObj.taskName) ? 'yellow' : 'gray';
-        starBtn.style.fontSize = '20px'; // Enlarge the star for better visibility
-        starBtn.onclick = function() {
-            toggleImportance(taskObj.taskName);
-        };
+        // Important button
+        const importantBtn = document.createElement('button');
+        importantBtn.innerHTML = importantTasks.includes(task.taskName) ? '★' : '☆';
+        importantBtn.classList.add('btn', 'btn-sm', 'importance-btn');
+        importantBtn.onclick = () => toggleImportance(task.taskName);
 
-        var taskSpan = document.createElement('span');
-        taskSpan.textContent = taskObj.taskName + (taskObj.dueDate ? ` (Due: ${taskObj.dueDate})` : '');
+        // Edit button
+        const editBtn = document.createElement('button');
+        editBtn.innerHTML = 'Edit';
+        editBtn.classList.add('btn', 'btn-secondary', 'btn-sm');
+        editBtn.onclick = () => editTask(index);
 
-        // Initialize the delete button with "X"
-        var deleteBtn = document.createElement('button');
-        deleteBtn.innerHTML = '&times;';
-        deleteBtn.className = 'btn btn-danger btn-sm ml-auto'; // Use ml-auto to push it to the far right
-        deleteBtn.onclick = function() {
-            deleteTask(taskObj.taskName);
-        };
+        // Delete button
+        const deleteBtn = document.createElement('button');
+        deleteBtn.innerHTML = 'Delete';
+        deleteBtn.classList.add('btn', 'btn-danger', 'btn-sm');
+        deleteBtn.onclick = () => deleteTask(index);
 
-        // Append elements in the order of star (importance), text, and then delete ("X")
-        li.appendChild(starBtn); // Star button immediately next to the task name on the left
-        li.appendChild(taskSpan);
-        li.appendChild(deleteBtn); // Ensure the delete button is on the right side
+        // Append buttons to their container
+        actionButtons.appendChild(importantBtn);
+        actionButtons.appendChild(editBtn);
+        actionButtons.appendChild(deleteBtn);
+
+        // Append elements to the list item
+        li.appendChild(taskDetail);
+        li.appendChild(actionButtons);
         
         taskListElement.appendChild(li);
     });
 }
 
 
-
-
 function toggleImportance(taskName) {
-    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
-    var index = importantTasks.indexOf(taskName);
+    const index = importantTasks.indexOf(taskName);
     if (index === -1) {
         importantTasks.push(taskName);
     } else {
         importantTasks.splice(index, 1);
     }
     localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
-    displayTasks(); // Refresh the task list to update star colors
+    displayTasks(); // Optionally refresh tasks if displaying importance status inline
 }
 
-function deleteTask(taskName) {
-
-    var allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
-    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
-    // Filter out the task to be deleted
-    allTasks = allTasks.filter(task => task.taskName !== taskName);
-    importantTasks = importantTasks.filter(task => task !== taskName); // Also remove from important if present
-
+function deleteTask(index) {
+    allTasks.splice(index, 1);
     localStorage.setItem('allTasks', JSON.stringify(allTasks));
-    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
-
-    displayTasks(); // Refresh the displayed list
+    displayTasks(); // Refresh the task list
 }
-
 </script>
 </body>
 </html>
-

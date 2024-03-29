@@ -39,7 +39,7 @@
         <a class="nav-link" href="myday.html">My Day</a>
         <a class="nav-link active" href="important.html">Important</a>
         <a class="nav-link" href="planned.html">Planned</a>
-        <a class="nav-link" href="task.html">Task</a>
+        <a class="nav-link" href="task.html">Tasks</a>
       </nav>
     </div>
     <div class="col-md-9 right-side">
@@ -58,54 +58,27 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 function displayImportantTasks() {
-    var allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
-    var importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
-    var importantListElement = document.getElementById('importantList');
+    const allTasks = JSON.parse(localStorage.getItem('allTasks')) || [];
+    const importantTasks = JSON.parse(localStorage.getItem('importantTasks')) || [];
+    const importantListElement = document.getElementById('importantList');
     importantListElement.innerHTML = ''; // Clear the list for updated display
 
-    var today = new Date();
-    today.setHours(0, 0, 0, 0); // Set to start of today for comparison
+    // Loop through all tasks and check if they are marked as important
+    allTasks.forEach(function(task) {
+        if (importantTasks.includes(task.taskName)) {
+            const li = document.createElement('li');
+            li.className = 'list-group-item d-flex justify-content-between align-items-center';
 
-    allTasks.forEach(function(taskObj) {
-        var dueDate = taskObj.dueDate ? new Date(taskObj.dueDate) : null;
-        var isDueTodayOrOverdue = dueDate && dueDate <= today;
-        var isImportant = importantTasks.includes(taskObj.taskName);
+            const textSpan = document.createElement('span');
+            textSpan.textContent = task.taskName + (task.dueDate ? ` (Due: ${task.dueDate})` : '');
 
-        // Include tasks that are marked as important or due today/overdue
-        if (isImportant || isDueTodayOrOverdue) {
-            var li = document.createElement('li');
-            li.classList.add('list-group-item', 'd-flex', 'justify-content-between', 'align-items-center');
-
-            var textContainer = document.createElement('div');
-            textContainer.classList.add('d-flex', 'align-items-center');
-
-            var starBtn = document.createElement('button');
-            starBtn.className = 'btn btn-sm';
-            starBtn.innerHTML = '&#9733;'; // Always show as important here
-            starBtn.style.color = 'yellow';
-            starBtn.style.fontSize = '20px';
-            starBtn.onclick = function() {
-                toggleImportance(taskObj.taskName);
-            };
-
-            var taskSpan = document.createElement('span');
-            taskSpan.textContent = ' ' + taskObj.taskName + 
-                (taskObj.dueDate ? ' (Due: ' + taskObj.dueDate + ')' : '');
-            taskSpan.classList.add('ml-2'); // Add spacing
-
-            textContainer.appendChild(starBtn);
-            textContainer.appendChild(taskSpan);
-
-            var deleteBtn = document.createElement('button');
-            deleteBtn.innerHTML = '&times;';
+            const deleteBtn = document.createElement('button');
+            deleteBtn.textContent = 'Delete';
             deleteBtn.className = 'btn btn-danger btn-sm';
-            deleteBtn.onclick = function() {
-                deleteTask(taskObj.taskName);
-            };
+            deleteBtn.onclick = function() { deleteTask(task.taskName); };
 
-            li.appendChild(textContainer);
+            li.appendChild(textSpan);
             li.appendChild(deleteBtn);
-
             importantListElement.appendChild(li);
         }
     });

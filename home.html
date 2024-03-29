@@ -1,81 +1,98 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Productivity App</title>
-<link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
-<style>
-  .nav-link {
-    color: black !important;
-    padding: 10px !important;
-    text-align: center;
-    border-bottom: 1px solid black;
-  }
-  .nav-link:hover {
-    background-color: #e0e0e0 !important;
-  }
-  .left-side, .right-side {
-    height: 100vh;
-  }
-  .left-side {
-    background-color: #f0f0f0;
-  }
-  .right-side {
-    background-color: #ddd;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  #calendar {
-    margin-top: 20px;
-    width: 100%;
-    max-width: 600px;
-  }
-  .calendar-header {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px;
-    background-color: #f8f9fa;
-  }
-  .day-names {
-    display: flex;
-    background-color: #e9ecef;
-    padding: 10px 0;
-  }
-  .day-name {
-    flex: 1;
-    text-align: center;
-  }
-  .day {
-    border: 1px solid #dee2e6;
-    min-height: 80px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  .today {
-    background-color: #ffc107; /* Highlight today's date */
-  }
-</style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Productivity App</title>
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .nav-link {
+            color: black !important;
+            padding: 10px !important;
+            text-align: center;
+            border-bottom: 1px solid black;
+        }
+        .nav-link:hover {
+            background-color: #e0e0e0 !important;
+        }
+        .left-side, .right-side {
+            height: 100vh;
+        }
+        .left-side {
+            background-color: #f0f0f0;
+        }
+        .right-side {
+            background-color: #ddd;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        #calendar {
+            margin-top: 20px;
+            width: 100%;
+            max-width: 600px;
+        }
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px;
+            background-color: #f8f9fa;
+        }
+        .day-names {
+            display: flex;
+            background-color: #e9ecef;
+            padding: 10px 0;
+        }
+        .day-name {
+            flex: 1;
+            text-align: center;
+        }
+        .day {
+            border: 1px solid #dee2e6;
+            min-height: 80px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .today {
+            background-color: #ffc107; /* Highlight today's date */
+        }
+        .timer-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+        .timer-inputs {
+            margin-bottom: 10px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container-fluid h-100">
-  <div class="row h-100">
-    <div class="col-md-3 left-side">
-      <nav class="nav flex-column">
-        <a class="nav-link active" href="home.html">Home</a>
-        <a class="nav-link" href="myday.html">My Day</a>
-        <a class="nav-link" href="important.html">Important</a>
-        <a class="nav-link" href="planned.html">Planned</a>
-        <a class="nav-link" href="task.html">Task</a>
-      </nav>
+    <div class="row h-100">
+        <div class="col-md-3 left-side">
+            <nav class="nav flex-column">
+                <a class="nav-link active" href="home.html">Home</a>
+                <a class="nav-link" href="myday.html">My Day</a>
+                <a class="nav-link" href="important.html">Important</a>
+                <a class="nav-link" href="planned.html">Planned</a>
+                <a class="nav-link" href="task.html">Tasks</a>
+            </nav>
+        </div>
+        <div class="col-md-9 right-side">
+            <div id="calendar"></div> <!-- Placeholder for the calendar -->
+            <div class="timer-container">
+              <div class="timer-inputs">
+                  <input type="number" id="timerMinutes" placeholder="Minutes" min="0" value="1">
+                  <input type="number" id="timerSeconds" placeholder="Seconds" min="0" value="0">
+              </div>
+              <button id="startTimerBtn" class="btn btn-primary">Start</button>
+              <button id="stopTimerBtn" class="btn btn-danger">Stop</button> <!-- Stop button -->
+              <div id="timerDisplay" class="mt-3">00:00</div>
+          </div>
+          
+        </div>
     </div>
-    <div class="col-md-9 right-side">
-      <div id="calendar"></div> <!-- Placeholder for the calendar -->
-    </div>
-  </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
@@ -83,56 +100,113 @@
 <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
 <script>
 document.addEventListener('DOMContentLoaded', function() {
-  const calendarEl = document.getElementById('calendar');
-  let currentMonth = new Date().getMonth();
-  let currentYear = new Date().getFullYear();
-  const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-  
-  function generateCalendar(month, year) {
-    const today = new Date();
-    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-    const firstDay = new Date(year, month, 1).getDay();
-    
-    let calendarHTML = `<div class="calendar-header">
-                          <span>${monthNames[month]} ${year}</span>
-                        </div>
-                        <div class="day-names">`;
-    
-    for (const dayName of dayNames) {
-      calendarHTML += `<div class="day-name">${dayName}</div>`;
-    }
-    calendarHTML += `</div><div class="row">`;
-    
-    for (let i = 0; i < firstDay; i++) {
-      calendarHTML += `<div class="col day"></div>`;
-    }
-    
-    for (let day = 1; day <= daysInMonth; day++) {
-      let dayClass = "day";
-      if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
-        dayClass += " today"; // Highlight the current day
-      }
-      calendarHTML += `<div class="col ${dayClass}">${day}</div>`;
-      if ((day + firstDay) % 7 === 0) {
-        calendarHTML += `</div><div class="row">`; // Start a new row for the next week
-      }
-    }
-
-    // Fill the last row with empty cells if needed
-    let lastDay = (firstDay + daysInMonth) % 7;
-    if (lastDay !== 0) {
-      for (let i = lastDay; i < 7; i++) {
-        calendarHTML += `<div class="col day"></div>`;
-      }
-    }
-
-    calendarHTML += `</div>`; // Ensure the last row is closed properly
-    calendarEl.innerHTML = calendarHTML;
-  }
-
-  generateCalendar(currentMonth, currentYear);
+    generateCalendar(new Date().getMonth(), new Date().getFullYear());
+    document.getElementById('startTimerBtn').addEventListener('click', startTimer);
+    document.getElementById('stopTimerBtn').addEventListener('click', stopTimer);
 });
+
+let countdown;
+let timeRemaining = 0; // Tracks remaining time for countdown
+let isPaused = false; // New flag to check if the timer was paused
+
+function startTimer() {
+    // Only set timeRemaining from inputs if the timer was not paused
+    if (!isPaused) {
+        const minutes = parseInt(document.getElementById('timerMinutes').value);
+        const seconds = parseInt(document.getElementById('timerSeconds').value);
+        timeRemaining = minutes * 60000 + seconds * 1000;
+    }
+
+    clearInterval(countdown); // Clear any existing countdowns before starting a new one
+
+    const endTime = Date.now() + timeRemaining;
+
+    countdown = setInterval(() => {
+        const now = Date.now();
+        timeRemaining = endTime - now;
+
+        if (timeRemaining <= 0) {
+            clearInterval(countdown);
+            timeRemaining = 0; // Reset timeRemaining for future calculations
+            document.getElementById('timerDisplay').textContent = "Time's up!";
+            isPaused = false; // Reset the paused flag
+        } else {
+            displayTimeLeft(timeRemaining);
+        }
+    }, 1000);
+
+    isPaused = false; // Reset the paused flag since we're starting the timer
+}
+
+function stopTimer() {
+    clearInterval(countdown); // Stop the countdown
+    isPaused = true; // Set the flag to indicate the timer is paused
+}
+
+function displayTimeLeft(remaining) {
+    const minutes = Math.floor(remaining / 60000);
+    const seconds = Math.floor((remaining % 60000) / 1000);
+    const display = `${minutes}:${seconds < 10 ? '0' : ''}${seconds}`;
+    document.getElementById('timerDisplay').textContent = display;
+}
+
+
+function generateCalendar(month, year) {
+    const calendarEl = document.getElementById('calendar');
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    const firstDayOfWeek = new Date(year, month, 1).getDay(); // Day of week the month starts on
+    const monthNames = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+    // Clear previous calendar
+    calendarEl.innerHTML = '';
+
+    // Add header
+    let header = document.createElement('div');
+    header.className = 'calendar-header';
+    header.innerHTML = `<strong>${monthNames[month]} ${year}</strong>`;
+    calendarEl.appendChild(header);
+
+    // Add day names
+    let dayNamesRow = document.createElement('div');
+    dayNamesRow.className = 'day-names';
+    dayNames.forEach(day => {
+        let dayName = document.createElement('div');
+        dayName.className = 'day-name';
+        dayName.textContent = day;
+        dayNamesRow.appendChild(dayName);
+    });
+    calendarEl.appendChild(dayNamesRow);
+
+    // Add days
+    let daysRow = document.createElement('div');
+    daysRow.className = 'row';
+    // Fill in the blanks for days before the first day of the month
+    for (let i = 0; i < firstDayOfWeek; i++) {
+        let emptyDay = document.createElement('div');
+        emptyDay.className = 'col day';
+        daysRow.appendChild(emptyDay);
+    }
+
+    // Fill in the actual days
+    for (let day = 1; day <= daysInMonth; day++) {
+        if ((day + firstDayOfWeek - 1) % 7 === 0) { // Start a new row after every 7 days
+            calendarEl.appendChild(daysRow); // Append the completed row
+            daysRow = document.createElement('div'); // Start a new row
+            daysRow.className = 'row';
+        }
+        let dayCell = document.createElement('div');
+        dayCell.className = 'col day';
+        if (new Date(year, month, day).toDateString() === new Date().toDateString()) {
+            dayCell.classList.add('today'); // Highlight today
+        }
+        dayCell.textContent = day;
+        daysRow.appendChild(dayCell);
+    }
+    // Append any remaining days
+    calendarEl.appendChild(daysRow);
+}
+
 </script>
 </body>
 </html>
