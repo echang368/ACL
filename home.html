@@ -53,6 +53,8 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex: 0 0 14.2857143%; /* 100% / 7 days */
+            max-width: 14.2857143%; /* 100% / 7 days */
         }
         .today {
             background-color: #ffc107; /* Highlight today's date */
@@ -190,7 +192,7 @@ function generateCalendar(month, year) {
 
     // Fill in the actual days
     for (let day = 1; day <= daysInMonth; day++) {
-        if ((day + firstDayOfWeek - 1) % 7 === 0) { // Start a new row after every 7 days
+        if ((day + firstDayOfWeek - 1) % 7 === 0 && day > 1) { // Start a new row after every 7 days
             calendarEl.appendChild(daysRow); // Append the completed row
             daysRow = document.createElement('div'); // Start a new row
             daysRow.className = 'row';
@@ -203,10 +205,11 @@ function generateCalendar(month, year) {
         dayCell.textContent = day;
         daysRow.appendChild(dayCell);
     }
-    // Append any remaining days
-    calendarEl.appendChild(daysRow);
+    // Ensure any remaining days in the last row are appended
+    if (daysRow.hasChildNodes()) {
+        calendarEl.appendChild(daysRow);
+    }
 }
-
 </script>
 </body>
 </html>
