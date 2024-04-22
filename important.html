@@ -96,21 +96,22 @@ function toggleImportance(taskName) {
 }
 
 function deleteTask(taskName) {
-    var allTasksIndex = allTasks.findIndex(task => task.taskName === taskName);
+    // Find and remove the task from all tasks
+    const allTasksIndex = allTasks.findIndex(task => task.taskName === taskName);
     if (allTasksIndex > -1) {
-        allTasks.splice(allTasksIndex, 1); // Remove from all tasks
+        allTasks.splice(allTasksIndex, 1);
     }
 
-    var importantTasksIndex = importantTasks.indexOf(taskName);
-    if (importantTasksIndex > -1) {
-        importantTasks.splice(importantTasksIndex, 1); // Remove from important tasks
+    // Remove from important tasks list
+    const importantIndex = importantTasks.indexOf(taskName);
+    if (importantIndex > -1) {
+        importantTasks.splice(importantIndex, 1);
     }
 
     localStorage.setItem('allTasks', JSON.stringify(allTasks));
     localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
-    displayImportantTasks(); // Refresh the important tasks list
+    displayImportantTasks();
 }
-
 
 function deleteTask(taskName) {
     // Remove task from all tasks and important tasks, if present

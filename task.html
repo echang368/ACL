@@ -181,10 +181,32 @@ function toggleImportance(taskName) {
 }
 
 function deleteTask(index) {
-    allTasks.splice(index, 1);
+    const taskName = allTasks[index].taskName;
+    allTasks.splice(index, 1); // Remove from task list
+
+    // Also remove from importantTasks if present
+    const importantIndex = importantTasks.indexOf(taskName);
+    if (importantIndex !== -1) {
+        importantTasks.splice(importantIndex, 1);
+    }
+
+    localStorage.setItem('allTasks', JSON.stringify(allTasks));
+    localStorage.setItem('importantTasks', JSON.stringify(importantTasks));
+    displayTasks();
+}
+
+function editTask(index) {
+    const task = allTasks[index];
+    const newTaskName = prompt("Enter new task name:", task.taskName);
+    const newDueDate = prompt("Enter new due date (YYYY-MM-DD):", task.dueDate);
+
+    if (newTaskName) task.taskName = newTaskName;
+    if (newDueDate) task.dueDate = newDueDate;
+
     localStorage.setItem('allTasks', JSON.stringify(allTasks));
     displayTasks();
 }
+
 </script>
 </body>
 </html>
